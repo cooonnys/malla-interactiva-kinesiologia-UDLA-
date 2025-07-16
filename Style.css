@@ -1,66 +1,67 @@
 :root {
-  --merlot: #582534; /* Pantone 19-1534 Merlot */
-  --chicory-coffee: #4A2C2A; /* Pantone 19-1419 Chicory Coffee */
-  --aprobado: #4CAF50;
-  --bloqueado: #999;
-  --texto-claro: #f9f9f9;
-  --texto-oscuro: #1e1e1e;
+  --merlot: #811331; /* Pantone 19-1534 Merlot */
+  --chicory-coffee: #4b3228; /* Pantone 19-1419 Chicory Coffee */
+  --light-bg: #f5f1ee;
+  --approved-bg: #b14051;
+  --unlocked-bg: var(--merlot);
+  --locked-bg: var(--chicory-coffee);
+  --text-color: #fff;
 }
 
 body {
-  font-family: "Segoe UI", sans-serif;
-  background-color: var(--chicory-coffee);
-  color: var(--texto-claro);
-  margin: 0;
-  padding: 20px;
+  background: var(--light-bg);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--chicory-coffee);
+  margin: 20px;
+  text-align: center;
 }
 
 h1 {
-  text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 25px;
   color: var(--merlot);
 }
 
-.malla {
+#malla-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 15px;
-  padding: 0 20px;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .ramo {
-  background-color: var(--merlot);
-  border: 2px solid var(--texto-claro);
-  border-radius: 10px;
+  background-color: var(--locked-bg);
+  border-radius: 8px;
   padding: 15px;
   cursor: pointer;
-  transition: transform 0.2s ease, background-color 0.3s;
-  opacity: 1;
+  color: var(--text-color);
+  user-select: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+  transition: background-color 0.3s, transform 0.2s;
 }
 
-.ramo:hover {
-  transform: scale(1.03);
+.ramo.unlocked {
+  background-color: var(--unlocked-bg);
+  cursor: pointer;
 }
 
-.ramo.bloqueado {
-  background-color: var(--bloqueado);
+.ramo.approved {
+  background-color: var(--approved-bg);
+  cursor: default;
+  box-shadow: 0 0 10px 2px #ffdbdb inset;
+}
+
+.ramo.locked {
   cursor: not-allowed;
   opacity: 0.5;
 }
 
-.ramo.aprobado {
-  background-color: var(--aprobado);
-  color: var(--texto-oscuro);
-}
-
-.ramo h3 {
-  margin-top: 0;
-  font-size: 16px;
-}
-
-.ramo small {
-  font-size: 12px;
-  display: block;
-  margin-top: 5px;
-  color: #ddd;
+.ramo:hover:not(.locked):not(.approved) {
+  transform: scale(1.05);
 }
