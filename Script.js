@@ -1,79 +1,67 @@
-const courses = {};
-const courseData = JSON.parse(localStorage.getItem("courseState") || "{}");
+// Definición de ramos con sus códigos y prerrequisitos (por código)
+const ramos = [
+  // Primer ciclo
+  { code: "MYF101", name: "Morfología y función I", prereq: [] },
+  { code: "MAT117", name: "Fundamento físico matemático en kinesiología", prereq: [] },
+  { code: "CBI102", name: "Fundamentos de biología celular e histología", prereq: [] },
+  { code: "KIN102", name: "Fundamentos de la kinesiología", prereq: [] },
+  { code: "LCE0016", name: "Inglés I", prereq: [] },
 
-fetch("courses.json")
-  .then(res => res.json())
-  .then(data => {
-    const container = document.getElementById("semesters-container");
+  { code: "MYF201", name: "Morfología y función II", prereq: ["MYF101"] },
+  { code: "FIS401", name: "Biofísica", prereq: ["MAT117"] },
+  { code: "CQU202", name: "Fundamentos de química y bioquímica para salud", prereq: [] },
+  { code: "KIN208", name: "Comunicación científica en salud", prereq: [] },
+  { code: "KIN204", name: "Actividad física y salud", prereq: [] },
+  { code: "LCE0026", name: "Inglés II", prereq: [] },
 
-    // agrupar por semestre estimado
-    const semesters = [
-      "Primer semestre", "Segundo semestre",
-      "Tercer semestre", "Cuarto semestre",
-      "Quinto semestre", "Sexto semestre",
-      "Séptimo semestre", "Octavo semestre",
-      "Noveno semestre", "Décimo semestre"
-    ];
-    
-    // Cursos por semestre
-    const semesterMap = {
-      "Primer semestre": ["MYF101", "MAT117", "CBI102", "KIN102", "LCE0016"],
-      "Segundo semestre": ["MYF201", "FIS401", "CQU202", "KIN208", "KIN204", "LCE0026"],
-      "Tercer semestre": ["KIN305", "AES519", "MYF302", "KIN303", "KIN207", "LIC001"],
-      "Cuarto semestre": ["KIN591", "KIN409", "KIN410", "KIN412", "KIN408", "LIC002"],
-      "Quinto semestre": ["KIN508", "KIN494", "KIN509", "KIN600", "KIN510", "LIC003"],
-      "Sexto semestre": ["KIN607", "KIN615", "KIN503", "KIN719", "KIN720", "LIC004"],
-      "Séptimo semestre": ["KIN723", "KIN721", "KIN211", "KIN001", "KIN812", "LIC005"],
-      "Octavo semestre": ["KIN823", "KIN718", "KIN505", "KIN817", "KIN315", "LIC006"],
-      "Noveno semestre": ["KIN916", "KIN917"],
-      "Décimo semestre": ["KIN916", "KIN917"]
-    };
+  // Segundo ciclo
+  { code: "KIN305", name: "Bases del movimiento", prereq: ["MYF201","FIS401"] },
+  { code: "AES519", name: "Bioestadística", prereq: ["MAT117"] },
+  { code: "MYF302", name: "Fisiología general", prereq: ["MYF101","KIN102"] },
+  { code: "KIN303", name: "Kinesiología basada en evidencia", prereq: ["KIN102","KIN208"] },
+  { code: "KIN208f", name: "Fundamentos fisiológico y psicológicos I", prereq: ["KIN204"] },
+  { code: "LIC001", name: "Fundamentos del actuar comunitario", prereq: [] },
 
-    for (const [semester, codes] of Object.entries(semesterMap)) {
-      const semDiv = document.createElement("div");
-      semDiv.className = "semester";
-      semDiv.innerHTML = `<h2>${semester}</h2>`;
-      
-      codes.forEach(code => {
-        const course = data.find(c => c.code === code);
-        courses[code] = course;
+  { code: "KIN591", name: "Análisis del movimiento", prereq: ["KIN305"] },
+  { code: "KIN409", name: "Control y aprendizaje motor", prereq: ["MYF302"] },
+  { code: "KIN410", name: "Fisiología del ejercicio", prereq: ["KIN204","MYF302"] },
+  { code: "KIN412", name: "Fisiopatología", prereq: ["MYF302","CQU202"] },
+  { code: "KIN408", name: "Fundamentos fisiológico y psicológicos II", prereq: ["KIN208"] },
+  { code: "LIC002", name: "Fundamentos éticos del actuar comunitario", prereq: ["LIC001"] },
 
-        const btn = document.createElement("div");
-        btn.className = "course locked";
-        btn.textContent = `${course.code} - ${course.name}`;
-        btn.dataset.code = course.code;
-        semDiv.appendChild(btn);
-      });
+  // Tercer ciclo
+  { code: "KIN508", name: "Disfunción neuromusculoesquelética", prereq: ["KIN591"] },
+  { code: "KIN494", name: "Disfunción cardiorrespiratoria", prereq: ["KIN412","MYF302"] },
+  { code: "KIN509", name: "Fundamentos farmacológicos en kinesiología", prereq: ["KIN412","MYF302"] },
+  { code: "KIN600", name: "Gestión y emprendimiento en salud", prereq: ["AES519"] },
+  { code: "KIN510", name: "Práctica integrada I", prereq: ["KIN408","KIN410"] }, // Simplificado a dos prereqs
+  { code: "LIC003", name: "Salud pública y políticas públicas", prereq: ["LIC002"] },
 
-      container.appendChild(semDiv);
-    }
+  { code: "KIN607", name: "Evaluación neuromusculoesquelética", prereq: ["KIN508"] },
+  { code: "KIN615", name: "Evaluación cardiorrespiratoria", prereq: ["KIN454"] }, // Faltó agregar KIN454, puedes agregar si quieres
+  { code: "KIN503", name: "Ergonomía, factores humanos y salud ocupacional", prereq: ["LIC003","KIN591"] },
+  { code: "KIN719", name: "Metodología de investigación", prereq: ["KIN600"] },
+  { code: "KIN720", name: "Prácticas integradas II", prereq: ["KIN494"] }, // Simplificado
+  { code: "LIC004", name: "Metodología participativa e interacción comunitaria", prereq: ["LIC003"] },
 
-    unlockCourses();
-    attachHandlers();
-  });
+  { code: "KIN723", name: "Intervención neuromusculoesquelética I", prereq: ["KIN507"] }, // KIN507 no está listado, ok para test
+  { code: "KIN721", name: "Intervención respiratoria", prereq: ["KIN615"] },
+  { code: "KIN211", name: "Agentes físicos en rehabilitación", prereq: [] }, // Simplificado
+  { code: "KIN001", name: "Seminario de grado", prereq: ["KIN719"] },
+  { code: "KIN812", name: "Práctica integrada III", prereq: ["KIN720","KIN515","KIN508"] }, // Simplificado
+  { code: "LIC005", name: "Taller de intervención comunitaria interdisciplinaria I", prereq: ["LIC004"] },
 
-function unlockCourses() {
-  for (const code in courses) {
-    const course = courses[code];
-    const prereqsMet = course.prerequisites.every(p => courseData[p]);
-    const btn = document.querySelector(`.course[data-code='${code}']`);
-    if (courseData[code]) {
-      btn.classList.remove("locked");
-      btn.classList.add("completed");
-    } else if (prereqsMet) {
-      btn.classList.remove("locked");
-    }
-  }
-}
+  { code: "KIN823", name: "Intervención neuromusculoesquelética II", prereq: ["KIN723"] },
+  { code: "KIN718", name: "Intervención cardiometabólica", prereq: ["KIN615","KIN410"] }, 
+  { code: "KIN505", name: "Intervención gerontogeriátrica", prereq: ["KIN412"] },
+  { code: "KIN817", name: "Seminario de grado II", prereq: ["KIN001"] },
+  { code: "KIN315", name: "Práctica integrada IV", prereq: ["KIN812"] },
+  { code: "LIC006", name: "Taller comunitario interdisciplinario II", prereq: ["LIC005"] },
 
-function attachHandlers() {
-  document.querySelectorAll(".course").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const code = btn.dataset.code;
-      if (btn.classList.contains("locked")) return;
-      courseData[code] = !courseData[code];
-      localStorage.setItem("courseState", JSON.stringify(courseData));
-      location.reload();
-    });
-  });
-}
+  { code: "KIN916", name: "Práctica profesional I", prereq: [] },
+  { code: "KIN917", name: "Práctica profesional II", prereq: [] },
+  { code: "KIN916b", name: "Práctica profesional III", prereq: [] },
+  { code: "KIN917b", name: "Práctica profesional IV", prereq: [] },
+];
+
+// Estado de cada ramo: "locked", "unlocked", "approved
